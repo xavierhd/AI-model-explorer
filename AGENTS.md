@@ -52,6 +52,8 @@ Guidance for coding agents working on this project. See `README.md` for what the
 ## Verifying changes
 
 - Local server: `.claude/launch.json` defines `plot` (`python -m http.server 8765`).
-  Open http://localhost:8765/intelligence-vs-cost.html.
+  Open http://localhost:8765/.
+- Hosted on GitHub Pages: https://xavierhd.github.io/AI-model-explorer/ (serves `index.html`).
+  The page must keep the name `index.html`.
 - Check that there are no console errors, the default view has about 120 points, and hover tooltips work.
 - Clear `localStorage` after testing, so test state doesn't leak into the user's view.

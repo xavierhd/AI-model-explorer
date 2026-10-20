@@ -4,9 +4,13 @@ An interactive, fullscreen scatter plot of the
 [Artificial Analysis LLM leaderboard](https://artificialanalysis.ai/leaderboards/models).
 By default it plots the Intelligence Index against cost per task (log scale).
 
+**▶ [Open the explorer](https://xavierhd.github.io/AI-model-explorer/)**
+· [This README on GitHub](https://github.com/xavierhd/AI-model-explorer#readme)
+
 ## Usage
 
-Open `intelligence-vs-cost.html` in a browser. A double-click works, and no server is needed.
+Use the [hosted page](https://xavierhd.github.io/AI-model-explorer/), or open `index.html`
+locally in a browser. A double-click works, and no server is needed.
 
 - **Hover** a point to see the model's details. When points overlap, every model under the cursor is listed.
 - **X / Y**: choose any numeric column of the expanded leaderboard table, and set each axis to log or linear.
@@ -56,7 +60,7 @@ models' scores**. Back it up, or keep it under version control.
 
 | File | Content |
 | --- | --- |
-| `intelligence-vs-cost.html` | Page structure |
+| `index.html` | Page structure |
 | `aa-plot.js` | Chart, legend, tooltip and state (plain JavaScript, no libraries) |
 | `aa-plot.css` | Styles |
 | `aa-data.js` | Data: `window.AA_DATA = { source, capturedAt, notes, columns, models }`, generated |
