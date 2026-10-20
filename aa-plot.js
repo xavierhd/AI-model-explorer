@@ -69,8 +69,8 @@ const resetAxesButton = byId('axreset');
 const swapAxesButton = byId('axswap');
 const legendButton = byId('legsw');
 
-// Must match the max-width of the narrow-screen section in aa-plot.css.
-const narrowScreen = matchMedia('(max-width: 700px)');
+// Phones in either orientation. Must match the media query of the narrow-screen section in aa-plot.css.
+const narrowScreen = matchMedia('(max-width: 700px), (max-height: 500px)');
 
 // ---------------------------------------------------------------------------
 // Model helpers

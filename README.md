@@ -33,7 +33,7 @@ locally in a browser. A double-click works, and no server is needed.
   dashed outline. They keep their last known values, and their tooltip warns that those may not be
   comparable with current models.
 
-On phones (width up to 700px), tap a point to see its details, and open the vendor list with the
+On phones (width up to 700px, or height up to 500px when held sideways), tap a point to see its details, and open the vendor list with the
 **Vendors** button.
 
 All settings are saved in the browser (localStorage) and restored when the page is reopened.

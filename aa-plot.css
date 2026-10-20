@@ -245,10 +245,10 @@ svg {
 }
 
 /* ------------------------------------------------------------------ */
-/* Narrow screens (max-width must match narrowScreen in aa-plot.js)    */
+/* Phones, upright or sideways (must match narrowScreen in aa-plot.js) */
 /* ------------------------------------------------------------------ */
 
-@media (max-width: 700px) {
+@media (max-width: 700px), (max-height: 500px) {
   #bar {
     left: 8px;
     right: 8px;
