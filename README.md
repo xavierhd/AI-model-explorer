@@ -7,6 +7,12 @@ By default it plots the Intelligence Index against cost per task (log scale).
 **▶ [Open the explorer](https://xavierhd.github.io/AI-model-explorer/)**
 · [This README on GitHub](https://github.com/xavierhd/AI-model-explorer#readme)
 
+[![Preview of the AI Model Explorer: all current models, Intelligence Index against cost per task](resources/preview-all.png)](https://xavierhd.github.io/AI-model-explorer/)
+
+Focus mode on the Anthropic and OpenAI latest families:
+
+[![Preview of the AI Model Explorer in focus mode: Anthropic and OpenAI flagship families](resources/preview-focus.png)](https://xavierhd.github.io/AI-model-explorer/)
+
 ## Usage
 
 Use the [hosted page](https://xavierhd.github.io/AI-model-explorer/), or open `index.html`

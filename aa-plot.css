@@ -131,6 +131,17 @@ svg {
   font-size: 12px;
 }
 
+/* GitHub repository link */
+#repo {
+  display: flex;
+  align-items: center;
+  color: #333;
+}
+
+#repo:hover {
+  color: #000;
+}
+
 #bar button {
   font-size: 12px;
   cursor: pointer;
