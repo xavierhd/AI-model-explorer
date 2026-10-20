@@ -20,6 +20,7 @@ locally in a browser. A double-click works, and no server is needed.
 
 - **Hover** a point to see the model's details. When points overlap, every model under the cursor is listed.
 - **X / Y**: choose any numeric column of the expanded leaderboard table, and set each axis to log or linear.
+- **⇄ Swap axes**: exchange X and Y. Each column keeps its log/linear setting.
 - **Reset axes**: go back to cost per task (log) against intelligence. Vendor and model selection is kept.
 - **Vendors legend**: turn vendors on or off, or use All / None. Click ▸ to show a vendor's model families
   (e.g. Haiku, Sonnet, Opus) and turn them on or off one by one. Vendors and families with no data

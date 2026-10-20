@@ -66,6 +66,7 @@ const yLogCheckbox = byId('ylog');
 const focusCheckbox = byId('focussw');
 const showOldCheckbox = byId('oldsw');
 const resetAxesButton = byId('axreset');
+const swapAxesButton = byId('axswap');
 
 // ---------------------------------------------------------------------------
 // Model helpers
@@ -335,6 +336,17 @@ function resetAxes() {
   ySelect.value = DEFAULT_Y_COLUMN;
   xLogCheckbox.checked = true;
   yLogCheckbox.checked = false;
+  draw();
+}
+
+// Exchange X and Y, keeping each column's log setting with it.
+function swapAxes() {
+  const xColumnKey = xSelect.value;
+  const isXLog = xLogCheckbox.checked;
+  xSelect.value = ySelect.value;
+  xLogCheckbox.checked = yLogCheckbox.checked;
+  ySelect.value = xColumnKey;
+  yLogCheckbox.checked = isXLog;
   draw();
 }
 
@@ -661,6 +673,7 @@ function draw() {
 });
 
 resetAxesButton.onclick = resetAxes;
+swapAxesButton.onclick = swapAxes;
 
 addEventListener('resize', draw);
 
