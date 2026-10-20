@@ -38,6 +38,10 @@ On phones (width up to 700px, or height up to 500px when held sideways), tap a p
 
 All settings are saved in the browser (localStorage) and restored when the page is reopened.
 
+**🔗 Share** copies a link to the current view: axes and log settings, hidden vendors and families,
+focus mode and retired/deprecated. The address bar always holds the same link, so copying it works too.
+Opening a shared link replaces the settings saved in that browser.
+
 ## Refreshing the data
 
 ```bash

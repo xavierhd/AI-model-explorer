@@ -17,6 +17,8 @@ const DEFAULT_Y_COLUMN = 'intelligenceIndex';
 const DEFAULT_TITLE = 'Artificial Analysis Intelligence Index vs Cost per Task';
 
 const STORAGE_KEY = 'aa-plot-state';
+const SHARE_HASH_PREFIX = 'v=';
+const SHARE_BUTTON_LABEL = '🔗 Share';
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
 // One color per vendor (extra vendors get generated hues).
@@ -68,6 +70,7 @@ const showOldCheckbox = byId('oldsw');
 const resetAxesButton = byId('axreset');
 const swapAxesButton = byId('axswap');
 const legendButton = byId('legsw');
+const shareButton = byId('share');
 
 // Phones in either orientation. Must match the media query of the narrow-screen section in aa-plot.css.
 const narrowScreen = matchMedia('(max-width: 700px), (max-height: 500px)');
@@ -302,14 +305,70 @@ function saveState() {
   } catch (error) {
     // Storage unavailable (private mode, blocked): state is simply not kept.
   }
+  updateShareLink(state);
 }
 
+// The address bar always holds a link to the current view (all state except open vendor lists).
+function updateShareLink(state) {
+  const { o, ...viewState } = state;
+  try {
+    history.replaceState(null, '', '#' + SHARE_HASH_PREFIX + encodeShareState(viewState));
+  } catch (error) {
+    // Some browsers refuse replaceState on file:// pages: the link is simply not updated.
+  }
+}
+
+// JSON as base64url (UTF-8 safe), so model family names survive any link.
+function encodeShareState(state) {
+  const bytes = new TextEncoder().encode(JSON.stringify(state));
+  const binary = String.fromCharCode(...bytes);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeShareState(text) {
+  const base64 = text.replace(/-/g, '+').replace(/_/g, '/');
+  const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function stateFromLink() {
+  const hash = location.hash.slice(1);
+  if (!hash.startsWith(SHARE_HASH_PREFIX)) {
+    return null;
+  }
+  try {
+    return decodeShareState(hash.slice(SHARE_HASH_PREFIX.length));
+  } catch (error) {
+    return null;
+  }
+}
+
+// A shared link wins over the state saved in this browser.
 function loadState() {
+  const linkedState = stateFromLink();
+  if (linkedState) {
+    return linkedState;
+  }
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   } catch (error) {
     return {};
   }
+}
+
+async function copyShareLink() {
+  const link = location.href;
+  try {
+    await navigator.clipboard.writeText(link);
+    shareButton.textContent = '✓ Link copied';
+  } catch (error) {
+    // Clipboard unavailable (e.g. file:// or no permission): let the user copy it by hand.
+    prompt('Copy this link to share the current view:', link);
+    return;
+  }
+  setTimeout(() => {
+    shareButton.textContent = SHARE_BUTTON_LABEL;
+  }, 1500);
 }
 
 function restoreState() {
@@ -698,8 +757,17 @@ function draw() {
 resetAxesButton.onclick = resetAxes;
 swapAxesButton.onclick = swapAxes;
 legendButton.onclick = () => legend.classList.toggle('open');
+shareButton.onclick = copyShareLink;
 
 addEventListener('resize', draw);
+
+// A shared link pasted into an already open page.
+addEventListener('hashchange', () => {
+  if (stateFromLink()) {
+    restoreState();
+    draw();
+  }
+});
 
 // Restore state when the page comes back from the browser's back/forward cache.
 addEventListener('pageshow', (event) => {
