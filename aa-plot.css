@@ -1,0 +1,201 @@
+/* AI Model Explorer – styles */
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+/* ------------------------------------------------------------------ */
+/* Chart                                                               */
+/* ------------------------------------------------------------------ */
+
+#plot {
+  position: fixed;
+  inset: 0;
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ax text {
+  font-size: 12px;
+  fill: #555;
+}
+
+.grid line {
+  stroke: #eee;
+}
+
+/* Data point */
+.dot {
+  stroke: #fff;
+  stroke-width: 1;
+  cursor: pointer;
+}
+
+/* Data point under the cursor (overrides the focus-mode vendor ring) */
+.dot.hl {
+  stroke: #000 !important;
+  stroke-width: 2.5 !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tooltip                                                             */
+/* ------------------------------------------------------------------ */
+
+#tip {
+  position: fixed;
+  display: none;
+  max-width: 440px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(20, 20, 20, 0.92);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.45;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Toolbar                                                             */
+/* ------------------------------------------------------------------ */
+
+#bar {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 13px;
+}
+
+#bar > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  white-space: nowrap;
+}
+
+#bar label {
+  cursor: pointer;
+  user-select: none;
+}
+
+#bar select {
+  max-width: 230px;
+  font-size: 12px;
+}
+
+#bar button {
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ */
+/* Legend (top and max-height are set by aa-plot.js)                   */
+/* ------------------------------------------------------------------ */
+
+#leg {
+  position: fixed;
+  top: 56px;
+  right: 12px;
+  max-width: 260px;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+}
+
+/* Entries without data for the chosen columns */
+#leg [hidden] {
+  display: none !important;
+}
+
+#leg button {
+  margin: 0 0 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+#leg label {
+  display: block;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#leg label.off {
+  opacity: 0.4;
+}
+
+#leg input {
+  margin: 0 5px 0 0;
+  vertical-align: middle;
+}
+
+/* Color swatch */
+#leg i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+}
+
+/* Vendor row */
+#leg .vend {
+  white-space: nowrap;
+}
+
+#leg .vend > label {
+  display: inline;
+}
+
+#leg .vend.off > label {
+  opacity: 0.4;
+}
+
+/* Expand/collapse arrow */
+#leg .tg {
+  display: inline-block;
+  width: 14px;
+  color: #666;
+  cursor: pointer;
+}
+
+/* Model family list under a vendor */
+#leg .fams {
+  margin: 1px 0 4px 30px;
+  font-size: 11px;
+}
+
+#leg .fams label.off {
+  opacity: 0.4;
+}
+
+/* Family color swatch (shown in focus mode) */
+#leg .fs {
+  width: 9px;
+  height: 9px;
+  margin-right: 4px;
+}

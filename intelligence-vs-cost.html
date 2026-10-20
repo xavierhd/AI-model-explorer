@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Model Explorer</title>
+  <link rel="stylesheet" href="aa-plot.css">
+</head>
+<body>
+  <!-- Chart (SVG is drawn here by aa-plot.js) -->
+  <div id="plot"></div>
+
+  <!-- Hover tooltip -->
+  <div id="tip"></div>
+
+  <!-- Vendor / model legend -->
+  <div id="leg"></div>
+
+  <!-- Toolbar -->
+  <div id="bar">
+    <span>
+      X <select id="xsel" autocomplete="off"></select>
+      <label><input type="checkbox" id="xlog" checked autocomplete="off"> log</label>
+    </span>
+    <span>
+      Y <select id="ysel" autocomplete="off"></select>
+      <label><input type="checkbox" id="ylog" autocomplete="off"> log</label>
+    </span>
+    <span>
+      <button id="axreset" title="Reset X/Y to cost (log) vs intelligence">Reset axes</button>
+    </span>
+    <span>
+      <label><input type="checkbox" id="focussw" autocomplete="off"> Focus mode</label>
+    </span>
+  </div>
+
+  <script src="aa-data.js"></script>
+  <script src="aa-plot.js"></script>
+</body>
+</html>
