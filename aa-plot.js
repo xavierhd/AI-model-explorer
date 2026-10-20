@@ -1,6 +1,7 @@
 // AI Model Explorer – scatter plot of the Artificial Analysis leaderboard.
 // Data comes from aa-data.js (window.AA_DATA), which must be loaded first.
-// A model looks like: { name, creator, license, intelligenceEstimated, <column key>: value, ... }
+// A model looks like: { name, slug, creator, license, intelligenceEstimated, deprecated,
+// firstSeen, lastSeen, [deprecationDate], [retired, retiredDate], <column key>: value, ... }
 // Missing values are omitted.
 
 'use strict';
@@ -63,6 +64,7 @@ const ySelect = byId('ysel');
 const xLogCheckbox = byId('xlog');
 const yLogCheckbox = byId('ylog');
 const focusCheckbox = byId('focussw');
+const showOldCheckbox = byId('oldsw');
 const resetAxesButton = byId('axreset');
 
 // ---------------------------------------------------------------------------
@@ -96,6 +98,11 @@ function thinkingLevelOf(row) {
   }
   const level = match[1].replace(/ with fallback/, '');
   return THINKING_LEVEL_PATTERN.test(level) ? level : '';
+}
+
+// Deprecated by the leaderboard, or no longer listed at all.
+function isOld(row) {
+  return Boolean(row.deprecated || row.retired);
 }
 
 // ---------------------------------------------------------------------------
@@ -144,6 +151,22 @@ function fillColumnSelect(select) {
 
 fillColumnSelect(xSelect);
 fillColumnSelect(ySelect);
+
+// ---------------------------------------------------------------------------
+// Data source note
+// ---------------------------------------------------------------------------
+
+function showDataSource() {
+  const link = document.createElement('a');
+  link.href = window.AA_DATA.source;
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.textContent = 'Artificial Analysis – LLM Leaderboard';
+  const note = byId('src');
+  note.append('Data: ', link, ` · captured ${window.AA_DATA.capturedAt}`);
+}
+
+showDataSource();
 
 // ---------------------------------------------------------------------------
 // Legend: one entry per vendor, with a collapsible list of its model families
@@ -249,7 +272,7 @@ buildLegend();
 // ---------------------------------------------------------------------------
 // Persistent UI state (localStorage). First visit uses the default view.
 // Stored fields: x, y (column keys), xl, yl (log scales), f (focus mode),
-// h (hidden families), o (vendors whose family list is open).
+// r (show retired/deprecated), h (hidden families), o (vendors whose family list is open).
 // ---------------------------------------------------------------------------
 
 function vendorBoxes() {
@@ -263,6 +286,7 @@ function saveState() {
     xl: xLogCheckbox.checked,
     yl: yLogCheckbox.checked,
     f: focusCheckbox.checked,
+    r: showOldCheckbox.checked,
     h: [...hiddenFamilies],
     o: vendorBoxes()
       .filter((box) => !box.querySelector('.fams').hidden)
@@ -291,6 +315,7 @@ function restoreState() {
   xLogCheckbox.checked = state.xl ?? true;
   yLogCheckbox.checked = state.yl ?? false;
   focusCheckbox.checked = state.f ?? false;
+  showOldCheckbox.checked = state.r ?? false;
 
   vendorControls.forEach((control) => control.setAll(true));
   (state.h || []).forEach((family) => hiddenFamilies.add(family));
@@ -455,7 +480,26 @@ function tooltipEntry(row, xColumn, yColumn) {
   extraColumns.forEach((column) => {
     html += `<br>${column.label}: <b>${formattedValue(row, column.key)}</b>`;
   });
-  return html;
+  return html + oldModelCaveat(row);
+}
+
+// Status and caveat for a retired or deprecated model ('' for a current one).
+function oldModelCaveat(row) {
+  if (!isOld(row)) {
+    return '';
+  }
+  const statuses = [];
+  if (row.deprecated) {
+    statuses.push(`Deprecated (noted ${row.deprecationDate || 'unknown date'})`);
+  }
+  if (row.retired) {
+    statuses.push(`Retired: no longer listed since ${row.retiredDate}`);
+  }
+  return (
+    `<div class="caveat">${statuses.join(' · ')}<br>` +
+    `Values as of ${row.lastSeen}. They may not be comparable with current models, ` +
+    'as benchmarks and index versions change over time.</div>'
+  );
 }
 
 function positionTooltip(event) {
@@ -525,9 +569,13 @@ function draw() {
   const isXLog = xLogCheckbox.checked;
   const isYLog = yLogCheckbox.checked;
   const isFocus = focusCheckbox.checked;
+  const showOld = showOldCheckbox.checked;
 
   // Rows with values for both columns, then those the user did not hide.
-  const availableRows = MODELS.filter((row) => !isNaN(xColumn.valueOf(row)) && !isNaN(yColumn.valueOf(row)));
+  const availableRows = MODELS.filter((row) =>
+    (showOld || !isOld(row)) &&
+    !isNaN(xColumn.valueOf(row)) &&
+    !isNaN(yColumn.valueOf(row)));
   updateLegendAvailability(availableRows);
   const visibleRows = availableRows.filter((row) => !hiddenFamilies.has(familyOf(row)));
 
@@ -590,6 +638,14 @@ function draw() {
       }
     }
 
+    if (isOld(row)) {
+      circle.classList.add('old');
+      if (!isFocus) {
+        // Outline in the point's own color, since the fill is faded.
+        circle.style.stroke = fill;
+      }
+    }
+
     points.push({ row, circle, x, y, radius });
   });
 
@@ -600,7 +656,7 @@ function draw() {
 // Wiring
 // ---------------------------------------------------------------------------
 
-[xSelect, ySelect, xLogCheckbox, yLogCheckbox, focusCheckbox].forEach((control) => {
+[xSelect, ySelect, xLogCheckbox, yLogCheckbox, focusCheckbox, showOldCheckbox].forEach((control) => {
   control.onchange = draw;
 });
 

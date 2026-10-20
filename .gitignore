@@ -1,0 +1,18 @@
+# aa-data.js is generated but deliberately versioned: it is the only copy of older models' scores.
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Saved copies of the leaderboard page (refresh_aa_data.py --input)
+/saved-pages/
+
+# Local agent / editor settings
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store

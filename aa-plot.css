@@ -44,6 +44,13 @@ svg {
   cursor: pointer;
 }
 
+/* Retired or deprecated model: hollow, dashed outline */
+.dot.old {
+  fill-opacity: 0.25;
+  stroke-dasharray: 2 1.5;
+  stroke-width: 1.5;
+}
+
 /* Data point under the cursor (overrides the focus-mode vendor ring) */
 .dot.hl {
   stroke: #000 !important;
@@ -67,8 +74,29 @@ svg {
   pointer-events: none;
 }
 
+/* Caveat for retired or deprecated models */
+#tip .caveat {
+  color: #ffb454;
+}
+
 /* ------------------------------------------------------------------ */
-/* Toolbar                                                             */
+/* Data source note                                                    */
+/* ------------------------------------------------------------------ */
+
+#src {
+  position: fixed;
+  left: 8px;
+  bottom: 4px;
+  font-size: 11px;
+  color: #777;
+}
+
+#src a {
+  color: #4a6fa5;
+}
+
+/* ------------------------------------------------------------------ */
+/* Toolbar                                                           */
 /* ------------------------------------------------------------------ */
 
 #bar {
