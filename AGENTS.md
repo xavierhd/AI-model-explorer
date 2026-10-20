@@ -37,9 +37,11 @@ Guidance for coding agents working on this project. See `README.md` for what the
 
 - Stored in localStorage under `aa-plot-state`. Fields: `x`, `y`, `xl`, `yl`, `f` (focus), `r` (show
   retired/deprecated), `h` (hidden families), `o` (open vendor lists).
-- The same state, minus `o`, is mirrored in the URL hash as `#v=<base64url JSON>` (`updateShareLink`,
-  via `history.replaceState`). On load, a valid hash wins over localStorage. Keep field names short
-  and stable, because shared links depend on them.
+- The same state, minus `o`, is mirrored in the URL hash (`updateShareLink`, via `history.replaceState`),
+  e.g. `#v=1&f=1&show=Claude_Opus_5.5,GPT-6_Luna`. Defaults are left out; families are written as the
+  shorter of `show`/`hide`, with a vendor name standing for all its families. See `encodeShareState`.
+  On load, a hash with `v=1` wins over localStorage. Shared links depend on this format: bump `v` if
+  it ever changes incompatibly.
 - Wrap every storage access in try/catch.
 - Call `restoreState()` before the first `draw()`, because `draw()` saves state.
 - The first visit must show cost per task (log) against intelligence. Reset axes changes only X/Y and

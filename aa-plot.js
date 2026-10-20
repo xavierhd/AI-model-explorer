@@ -17,7 +17,7 @@ const DEFAULT_Y_COLUMN = 'intelligenceIndex';
 const DEFAULT_TITLE = 'Artificial Analysis Intelligence Index vs Cost per Task';
 
 const STORAGE_KEY = 'aa-plot-state';
-const SHARE_HASH_PREFIX = 'v=';
+const SHARE_FORMAT_VERSION = '1';
 const SHARE_BUTTON_LABEL = '🔗 Share';
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
@@ -187,7 +187,7 @@ function buildLegend() {
   legend.innerHTML = '<b>Vendors</b> <button id="all">All</button> <button id="none">None</button>';
 
   vendors.forEach((vendor) => {
-    const families = [...new Set(MODELS.filter((row) => row.creator === vendor).map(familyOf))];
+    const families = familiesOfVendor(vendor);
     const hasFamilyList = families.length > 1;
 
     const vendorBox = document.createElement('div');
@@ -310,35 +310,111 @@ function saveState() {
 
 // The address bar always holds a link to the current view (all state except open vendor lists).
 function updateShareLink(state) {
-  const { o, ...viewState } = state;
   try {
-    history.replaceState(null, '', '#' + SHARE_HASH_PREFIX + encodeShareState(viewState));
+    history.replaceState(null, '', '#' + encodeShareState(state));
   } catch (error) {
     // Some browsers refuse replaceState on file:// pages: the link is simply not updated.
   }
 }
 
-// JSON as base64url (UTF-8 safe), so model family names survive any link.
+// Link format, e.g. "#v=1&f=1&show=Claude_Opus_5.5,GPT-6_Luna":
+// - v: format version (always present, so a default view still overrides saved state).
+// - x, y: column keys; xl, yl, f, r: 1/0 flags. Each is left out when it has its default value.
+// - show or hide: families shown or hidden, whichever list is shorter. A vendor name stands for
+//   all of that vendor's families. Names are joined by "," with "_" for spaces.
 function encodeShareState(state) {
-  const bytes = new TextEncoder().encode(JSON.stringify(state));
-  const binary = String.fromCharCode(...bytes);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const parts = [`v=${SHARE_FORMAT_VERSION}`];
+  const addIfChanged = (key, value, defaultValue) => {
+    if (value !== defaultValue) {
+      parts.push(`${key}=${typeof value === 'boolean' ? Number(value) : encodeLinkName(value)}`);
+    }
+  };
+  addIfChanged('x', state.x, DEFAULT_X_COLUMN);
+  addIfChanged('y', state.y, DEFAULT_Y_COLUMN);
+  addIfChanged('xl', state.xl, true);
+  addIfChanged('yl', state.yl, false);
+  addIfChanged('f', state.f, false);
+  addIfChanged('r', state.r, false);
+
+  const hidden = new Set(state.h);
+  if (hidden.size > 0) {
+    const shownList = compactFamilyList((family) => !hidden.has(family));
+    const hiddenList = compactFamilyList((family) => hidden.has(family));
+    parts.push(shownList.length <= hiddenList.length ? `show=${shownList}` : `hide=${hiddenList}`);
+  }
+  return parts.join('&');
 }
 
-function decodeShareState(text) {
-  const base64 = text.replace(/-/g, '+').replace(/_/g, '/');
-  const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
-  return JSON.parse(new TextDecoder().decode(bytes));
+// Families matching the test, with whole vendors collapsed to the vendor name.
+function compactFamilyList(isIncluded) {
+  const names = [];
+  vendors.forEach((vendor) => {
+    const families = familiesOfVendor(vendor);
+    const included = families.filter(isIncluded);
+    if (included.length === families.length) {
+      names.push(vendor);
+    } else {
+      names.push(...included);
+    }
+  });
+  return names.map(encodeLinkName).join(',');
+}
+
+function familiesOfVendor(vendor) {
+  return [...new Set(MODELS.filter((row) => row.creator === vendor).map(familyOf))];
+}
+
+function encodeLinkName(name) {
+  return encodeURIComponent(name).replace(/%20/g, '_').replace(/%2B/g, '+').replace(/%3A/g, ':');
+}
+
+function decodeLinkName(text) {
+  return decodeURIComponent(text.replace(/_/g, ' '));
+}
+
+// Families named by a link list (vendor names expand to all their families).
+function expandFamilyList(text) {
+  const families = new Set();
+  text.split(',').filter(Boolean).map(decodeLinkName).forEach((name) => {
+    const vendorFamilies = vendors.includes(name) ? familiesOfVendor(name) : [name];
+    vendorFamilies.forEach((family) => families.add(family));
+  });
+  return families;
 }
 
 function stateFromLink() {
-  const hash = location.hash.slice(1);
-  if (!hash.startsWith(SHARE_HASH_PREFIX)) {
+  // Not URLSearchParams: it would turn "+" in names like "Claude 3+" into spaces.
+  const fields = {};
+  location.hash.slice(1).split('&').forEach((part) => {
+    const separator = part.indexOf('=');
+    if (separator > 0) {
+      fields[part.slice(0, separator)] = part.slice(separator + 1);
+    }
+  });
+  if (fields.v !== SHARE_FORMAT_VERSION) {
     return null;
   }
+
   try {
-    return decodeShareState(hash.slice(SHARE_HASH_PREFIX.length));
+    const flag = (key, defaultValue) => (key in fields ? fields[key] === '1' : defaultValue);
+    const state = {
+      x: fields.x ? decodeLinkName(fields.x) : DEFAULT_X_COLUMN,
+      y: fields.y ? decodeLinkName(fields.y) : DEFAULT_Y_COLUMN,
+      xl: flag('xl', true),
+      yl: flag('yl', false),
+      f: flag('f', false),
+      r: flag('r', false),
+      h: [],
+    };
+    if ('hide' in fields) {
+      state.h = [...expandFamilyList(fields.hide)];
+    } else if ('show' in fields) {
+      const shown = expandFamilyList(fields.show);
+      state.h = vendors.flatMap(familiesOfVendor).filter((family) => !shown.has(family));
+    }
+    return state;
   } catch (error) {
+    // Malformed escape in a hand-edited link.
     return null;
   }
 }
