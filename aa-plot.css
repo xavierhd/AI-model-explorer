@@ -238,3 +238,62 @@ svg {
   height: 9px;
   margin-right: 4px;
 }
+
+/* Vendor list toggle (narrow screens only) */
+#legsw {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Narrow screens (max-width must match narrowScreen in aa-plot.js)    */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 700px) {
+  #bar {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  #bar > span {
+    padding: 2px 6px;
+    white-space: normal;
+  }
+
+  #bar select {
+    max-width: 38vw;
+  }
+
+  #legsw {
+    display: block;
+  }
+
+  /* The legend is a drop-down over the chart, opened with the Vendors button */
+  #leg {
+    display: none;
+    right: 8px;
+    left: 8px;
+    max-width: none;
+    background: rgba(255, 255, 255, 0.97);
+    font-size: 14px;
+  }
+
+  #leg.open {
+    display: block;
+  }
+
+  #leg label {
+    padding: 3px 0;
+  }
+
+  #tip {
+    max-width: calc(100vw - 16px);
+    box-sizing: border-box;
+  }
+
+  #src {
+    font-size: 10px;
+  }
+}

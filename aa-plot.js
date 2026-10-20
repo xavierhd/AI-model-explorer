@@ -67,6 +67,10 @@ const focusCheckbox = byId('focussw');
 const showOldCheckbox = byId('oldsw');
 const resetAxesButton = byId('axreset');
 const swapAxesButton = byId('axswap');
+const legendButton = byId('legsw');
+
+// Must match the max-width of the narrow-screen section in aa-plot.css.
+const narrowScreen = matchMedia('(max-width: 700px)');
 
 // ---------------------------------------------------------------------------
 // Model helpers
@@ -523,9 +527,9 @@ function positionTooltip(event) {
   tooltip.style.top = Math.max(4, top) + 'px';
 }
 
-// Hover lists every point under/near the cursor, so overlapping points are all readable.
+// Hover (or tap, on touch screens) lists every point under/near the cursor, so overlapping points are all readable.
 function attachHover(svg, points, xColumn, yColumn) {
-  svg.onmousemove = (event) => {
+  const showPointsUnder = (event) => {
     const bounds = svg.getBoundingClientRect();
     const mouseX = event.clientX - bounds.left;
     const mouseY = event.clientY - bounds.top;
@@ -550,7 +554,14 @@ function attachHover(svg, points, xColumn, yColumn) {
     positionTooltip(event);
   };
 
-  svg.onmouseleave = () => {
+  svg.onpointermove = showPointsUnder;
+  svg.onpointerdown = showPointsUnder;
+
+  // A finger leaving the screen keeps the tooltip; a tap elsewhere replaces or hides it.
+  svg.onpointerleave = (event) => {
+    if (event.pointerType !== 'mouse') {
+      return;
+    }
     tooltip.style.display = 'none';
     points.forEach((point) => point.circle.classList.remove('hl'));
   };
@@ -565,7 +576,11 @@ function draw() {
   legend.style.top = toolbarBottom + 8 + 'px';
   legend.style.maxHeight = innerHeight - toolbarBottom - 24 + 'px';
 
-  const margin = { left: 80, right: legend.offsetWidth + 28, top: toolbarBottom + 44, bottom: 60 };
+  // On narrow screens the legend is a drop-down over the chart, so the chart takes the full width.
+  const isNarrow = narrowScreen.matches;
+  const margin = isNarrow
+    ? { left: 58, right: 14, top: toolbarBottom + 30, bottom: 48 }
+    : { left: 80, right: legend.offsetWidth + 28, top: toolbarBottom + 44, bottom: 60 };
   const layout = {
     left: margin.left,
     top: margin.top,
@@ -598,14 +613,22 @@ function draw() {
 
   const isDefaultView = xColumn.key === DEFAULT_X_COLUMN && yColumn.key === DEFAULT_Y_COLUMN;
   const title = isDefaultView ? DEFAULT_TITLE : `${yColumn.label} vs ${xColumn.label}`;
-  svgText(svg, {
-    x: layout.left + layout.width / 2,
-    y: toolbarBottom + 26,
+  const titleFontSize = isNarrow ? 13 : 18;
+  const titleText = svgText(svg, {
+    x: isNarrow ? innerWidth / 2 : layout.left + layout.width / 2,
+    y: toolbarBottom + (isNarrow ? 20 : 26),
     'text-anchor': 'middle',
-    'font-size': 18,
+    'font-size': titleFontSize,
     'font-weight': 600,
     fill: '#222',
   }, title);
+
+  // Shrink a title wider than the screen so it stays readable in full.
+  const maxTitleWidth = innerWidth - 16;
+  const titleWidth = titleText.getComputedTextLength();
+  if (titleWidth > maxTitleWidth) {
+    titleText.setAttribute('font-size', titleFontSize * maxTitleWidth / titleWidth);
+  }
 
   drawAxes(svg, layout, xColumn, yColumn, xAxis, yAxis, isXLog, isYLog);
 
@@ -674,6 +697,7 @@ function draw() {
 
 resetAxesButton.onclick = resetAxes;
 swapAxesButton.onclick = swapAxes;
+legendButton.onclick = () => legend.classList.toggle('open');
 
 addEventListener('resize', draw);
 
